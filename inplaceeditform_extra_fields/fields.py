@@ -259,3 +259,74 @@ class AdaptorSimpleTinyMCEField(AdaptorTinyMCEField):
                                           config=self.config,
                                           width=None)
         return field
+
+
+class AdaptorCKEDITORField(AdaptorTextAreaField):
+
+    @property
+    def name(self):
+        return 'ckeditor'
+
+    @property
+    def classes(self):
+        return super(AdaptorCKEDITORField, self).classes + " textareainplaceedit"
+
+    def __init__(self, *args, **kwargs):
+        super(AdaptorCKEDITORField, self).__init__(*args, **kwargs)
+        self.widget_options = self.config and self.config.get('widget_options', {})
+
+    @property
+    def CKEEDITOR(self):
+        from ckeditor.widgets import CKEditorWidget
+        return CKEditorWidget
+
+    @classmethod
+    def get_config(self, request, **kwargs):
+        config = super(AdaptorCKEDITORField, self).get_config(request, **kwargs)
+        config['can_auto_save'] = '0'
+        config['autoSave'] = '0'
+        return config
+
+    def get_field(self):
+        field = super(AdaptorCKEDITORField, self).get_field()
+        field.field.widget = self.CKEEDITOR()
+        return field
+
+    def _render_value(self, field_name=None):
+        return mark_safe(super(AdaptorCKEDITORField, self).render_value(field_name=field_name))
+
+    def render_value(self, field_name=None):
+        return self._render_value(field_name)
+
+    def render_value_edit(self):
+        field = self.get_field()
+        value = self._render_value()
+        is_ajax = self.request.is_ajax()
+        if not value:
+            value = self.empty_value()
+        if is_ajax:
+            return value
+        if not getattr(self.request, 'inplace_js_rendered', None) and not is_ajax:
+            if getattr(self.request, 'inplace_js_extra', None) is None:
+                self.request.inplace_js_extra = ''
+            scripts = ''.join(field.field.widget.media.render_js())
+            if not scripts in self.request.inplace_js_extra:
+                self.request.inplace_js_extra += scripts
+            return value
+        return render_to_string('inplaceeditform_extra_fields/adaptor_ckeditor/render_value_edit.html',
+            {'value': value,
+             'adaptor': self,
+             'field': self.get_field()})
+
+    def render_field(self, template_name="inplaceeditform_extra_fields/adaptor_ckeditor/render_field.html", extra_context=None):
+        return super(AdaptorCKEDITORField, self).render_field(template_name=template_name,
+            extra_context=extra_context)
+
+    def render_media_field(self,
+                           template_name="inplaceeditform_extra_fields/adaptor_ckeditor/render_media_filed.html",
+                           extra_context=None):
+        extra_context = extra_context or {}
+        context = {'STATIC_URL': get_static_url(subfix='inplaceeditform_extra_fields')}
+        context.update(extra_context)
+        return super(AdaptorCKEDITORField, self).render_media_field(template_name=template_name,
+            extra_context=context)

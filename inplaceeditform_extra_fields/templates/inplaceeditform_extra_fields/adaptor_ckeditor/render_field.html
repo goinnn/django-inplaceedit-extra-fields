@@ -1,0 +1,6 @@
+{% extends "inplaceeditform/render_field.html" %}
+
+{% block formclass %}ckeditorForm{% endblock %}
+
+{% block classapply %}{{ block.super }} applyCkeditor{% endblock %}
+{% block classcancel %}{{ block.super }} cancelCkeditor{% endblock %}

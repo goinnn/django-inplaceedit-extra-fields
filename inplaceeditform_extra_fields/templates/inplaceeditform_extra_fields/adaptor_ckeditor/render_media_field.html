@@ -1,0 +1,26 @@
+{% extends "inplaceeditform/render_media_field.html" %}
+
+
+{% block media %}
+{{ field.field.widget.media }}
+<script type="text/javascript">
+    (function($){
+        setInterval(function () {
+            var $apply = $('.applyCkeditor');
+            if ($apply && !$apply.data("getValue")) {
+                $apply.data("getValue", function (form, field_id) {
+                    return CKEDITOR.instances[field_id].getData();
+                });
+            }
+        }, 300);
+        function ckeditorFinish(button) {
+            var _id = button.parent().find('.field_id').text();
+            if (_id) {
+                CKEDITOR.instances[_id].destroy();
+            }
+        }
+        $(".applyCkeditor").data("applyFinish", ckeditorFinish);
+        $(".cancelCkeditor").data("cancelFinish", ckeditorFinish);
+    })(jQuery);
+</script>
+{% endblock %}
