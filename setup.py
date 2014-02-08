@@ -41,5 +41,6 @@ setup(
     packages=('inplaceeditform_extra_fields', ),
     include_package_data=True,
     zip_safe=False,
-    install_requires=['django-inplaceedit>=1.2.3']
+    install_requires=['django-inplaceedit>=1.2.3', 'django-ckeditor>=3.6.2.1']
+
 )
