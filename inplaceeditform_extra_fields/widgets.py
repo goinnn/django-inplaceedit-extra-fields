@@ -17,7 +17,6 @@ import sys
 
 from django.conf import settings
 from django.forms import widgets
-from django.forms.util import flatatt
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 
@@ -25,6 +24,12 @@ try:
     from django.utils.simplejson import JSONEncoder
 except ImportError:
     from json import JSONEncoder
+    
+try:
+    from django.forms.utils import flatatt
+except ImportError:
+    from django.forms.util import flatatt
+
 
 
 def get_tinyMCE_js():
